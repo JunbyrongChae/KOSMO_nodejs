@@ -1,0 +1,55 @@
+<div class="row my-5">
+  <div class="col">
+    <h1 class="text-center mb-5">글정보</h1>
+    <div class="text-end mb-2" id="btn-group" style="display:none">
+      <button class="btn btn-primary btn-sm" id="btn-update">수정</button>
+      <button class="btn btn-danger btn-sm" id="btn-delete">삭제</button>
+    </div>
+    <div id="post"></div>
+  </div>
+</div>
+
+<!--게시글정보 템플릿-->
+<script id="temp" type="text/x-handlebars-template">
+  <div class="card">
+    <div class="card-body">
+      <h5>{{ title }}</h5>
+      <div>{{ body }}</div>
+    </div>
+    <div class="card-footer">
+      Posted on <span>{{ date }}</span> by <span>{{ email }}</span>
+    </div>
+  </div>
+</script>
+
+<script type="module">
+  import { app } from '/javascripts/firebase.js'
+  import { getFirestore, doc, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js'
+  const db = getFirestore(app)
+  const id = "<%=id%>"
+
+  const snapshot = await getDoc(doc(db, 'posts',id))//id는 index.js에서 읽어온다
+  const post = snapshot.data() //1건 왜냐하면 아이디로 검색한 결과이므로
+  if(post.email===localStorage.getItem("email")){
+    $('#btn-group').toggle()
+  }
+  let temp = Handlebars.compile($('#temp').html())
+  $('#post').html(temp(post))
+
+  //삭제
+  $('#btn-delete').on('click', async function() {
+    if(confirm("게시글을 삭제하시겠습니까?")){
+      await deleteDoc(doc(db, 'posts',id))
+      location.href = "/posts"
+    }
+  })
+
+  //수정
+  $('#btn-update').on('click', function() {
+    //현재 화면에서 수정하는 것이 아니고 수정화면을 띄워서 기존 정보를 갖고
+    //수정하고자 하는 값을 받은 후에 저장(기존값을 수정하는 것)
+    //기존에 보이던 화면 url이 새로운 url로 변경
+    //기존의 요청은 끊어지고 새로운 요청이 일어난다.
+    location.href = '/posts/update/'+id
+  })
+</script>

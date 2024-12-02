@@ -1,60 +1,89 @@
 <div class="row my-5">
-	<div class="col">
-		<h1 class="text-center mb-5">회원정보수정</h1>
-		<div class="card p-5">
-			<form name="frm" method="post">
-				<div class="input-group my-2">
-					<div class="input-group-text px-5">성명</div>
-					<input class="form-control" name="name" />
-				</div>
-				<div class="input-group my-2">
-					<div class="input-group-text px-5">주소</div>
-					<input class="form-control" name="address"  />
-				</div>
-				<div class="input-group my-2">
-					<div class="input-group-text px-5">전화</div>
-					<input class="form-control" name="phone"  />
-				</div>
-				<div>
-					<img id="fileName" src="https://placehold.co/200x200" width="30%" />
-					<input class="form-control mt-2" type="file" name="file" />
-				</div>
-				<div class="text-center mt-3">
-					<button class="btn-primary btn px-5">정보수정</button>
-				</div>
-			</form>
-		</div>
-	</div>
+  <div class="col">
+    <h1 class="text-center mb-5">회원정보수정</h1>
+    <div class="card p-5">
+      <form name="frm" method="post">
+        <div class="input-group my-2">
+          <div class="input-group-text px-5">성명</div>
+          <input class="form-control" name="name" />
+        </div>
+        <div class="input-group my-2">
+          <div class="input-group-text px-5">주소</div>
+          <input class="form-control" name="address" />
+        </div>
+        <div class="input-group my-2">
+          <div class="input-group-text px-5">전화</div>
+          <input class="form-control" name="phone" />
+        </div>
+        <div>
+          <img id="fileName" src="https://placehold.co/200x200" width="30%" />
+          <input class="form-control mt-2" type="file" name="file" />
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn-primary btn px-5">정보수정</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script type="module">
-	import { app } from '/javascripts/firebase.js'
-	//to do ->addDoc / setDoc 차이점, NoSQL은 입력과 수정을 따로 구분안함
-	import { getFirestore, setDoc, doc, collection } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js'
-	const db = getFirestore(app)
-	const uid = localStorage.getItem("uid")
+  import { app } from '/javascripts/firebase.js'
+  //to do ->addDoc / setDoc 차이점, NoSQL은 입력과 수정을 따로 구분안함
+  import { getFirestore, setDoc, doc, collection, getDoc } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js'
+  import { getStorage, uploadBytes, getDownloadURL, ref } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js'
+  const db = getFirestore(app)//firebase-firestore사용할 때
+  const storage = getStorage(app)//firebase-storage사용할 때
+  const uid = localStorage.getItem("uid")
 
-	if (!uid) {
-        alert("로그인이 필요합니다.");
-        location.href = "/login";
-    }
+  //수정하기 화면을 열 때 사용자 정보를 화면에 출력
+  const snapshot = await getDoc(doc(db, `users/${uid}`))
+  if (snapshot.data()) {
+    const user = snapshot.data()
+    $(frm.name).val(user.name)
+    $(frm.address).val(user.address)
+    $(frm.phone).val(user.phone)
+    //사진이 있으면...
+    if (user.photo) { $('#fileName').attr('src', user.photo) }
+  }
 
+  $(frm).on("submit", async (e) => {
+    e.preventDefault()
+    if (window.confirm("변경 내용을 저장하시겠습니까?")) {
+      const name = $(frm.name).val()
+      const address = $(frm.address).val()
+      const phone = $(frm.phone).val()
+      const email = localStorage.getItem("email")
+      //console.log(`name : ${name}, address : ${address}, phone : ${phone}, email : ${email}`)
+      //사진파일이 존재하면 
+      if (frm.file.files[0]) {
+        const snapshot = await uploadBytes(ref(storage, `/photos/${Date.now()}`), frm.file.files[0])
+        const url = await getDownloadURL(snapshot.ref)
+        await setDoc(doc(db, `users/${uid}`), {
+          email: email,
+          name: name,
+          address: address,
+          phone: phone,
+          photo: url
+        })
 
-	$(frm).on("submit", async(e) => {
-		e.preventDefault()
-		if (window.confirm("변경 내용을 저장하시겠습니까?")) {
-			const name = $(frm.name).val()
-			const address = $(frm.address).val()
-			const phone = $(frm.phone).val()
-			const email = localStorage.getItem("email")
-			//console.log(`name : ${name}, address : ${address}, phone : ${phone}, email : ${email}`)
-			await setDoc(doc(db, `users/${uid}`), {
-				email: email,
-				name: name,
-				address: address,
-				phone: phone
-			})
-			location.href = "/users/mypage"
-		}/////// end of if
-	})
+      } else {
+        const photo = $("#fileName").attr("src")
+        await setDoc(doc(db, `users/${uid}`), {
+          email: email,
+          name: name,
+          address: address,
+          phone: phone,
+          photo: photo
+        })
+      }
+      alert("정보수정완료")
+      location.href = "/users/mypage"
+    }/////// end of if
+  })
+
+  $(frm.file).on("change", function (e) {
+    $("#fileName").attr("src", URL.createObjectURL(e.target.files[0]))
+  })
+
 </script>

@@ -20,7 +20,7 @@ router.get('/posts', function(req, res, next) {
 router.get('/posts/write', function(req, res, next) {
   res.render('index', { title: '글쓰기',pageName:'posts/write.ejs' });
 })
-router.get('/posts:id', function(req, res, next) {
+router.get('/posts/:id', function(req, res, next) {
   let id = req.params.id
   res.render('index', { title: '상세보기',pageName:'posts/read.ejs',id:id });
 })

@@ -1,0 +1,40 @@
+<div class="row my-5">
+  <div class="col">
+    <h1 class="text-center mb-5">글수정</h1>
+    <form name="frm" method="post">
+      <input class="form-control my-2" name="title" placeholder="제목을 입력하세요.">
+      <textarea class="form-control" name="body" rows="10" placeholder="내용을 입력하세요."></textarea>
+      <div class="text-center my-2">
+        <button class="btn btn-primary">글수정</button>
+        <button class="btn btn-secondary" type="reset">수정취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { app } from "/javascripts/firebase.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+  const db = getFirestore(app);
+  //routes > index.js에서 파라미터로 받은 값을 출력
+  const id="<%=id%>";
+  console.log(`수정하고자하는 id ===> ${id}`);
+  let post=null;
+
+  //DB에서 가져온 정보 출력
+  getPost()
+  async function getPost() {
+    const snapshot = await getDoc(doc(db, `posts/${id}`));
+    post = snapshot.data();
+    $(frm.title).val(post.title);
+    $(frm.body).val(post.body);
+  }
+
+  $(frm).on("submit", async function(e) {
+    console.log('글수정 클릭');
+    e.preventDefault();//submit 이슈로 추가 - 없으면 새로고침 발생
+    $("#modal-confirm .modal-body").html("게시글을 수정하시겠습니까?");
+    $("#modal-confirm").modal("show");
+    //location.href="/posts";
+    });
+</script>
