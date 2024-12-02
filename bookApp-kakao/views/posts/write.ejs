@@ -1,0 +1,60 @@
+<div class="row my-5">
+    <div class="col">
+        <h1 class="text-center mb-5">글쓰기</h1>
+        <form name="frm" method="post">
+            <input class="form-control my-2" name="title" placeholder="제목을 입력하세요.">
+            <textarea class="form-control" name="body" rows="10" placeholder="내용을 입력하세요."></textarea>
+            <div class="text-center my-2">
+                <button class="btn btn-primary">글등록</button>
+                <button class="btn btn-secondary" type="reset">등록취소</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- 날짜포맨 지정함수 -->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script type = 'module'>
+    /* 
+    ES6지원하기 시작한 모듈 개념
+    jascript를 갖고 모듈화 시켜서 재사용이 가능한 코드를 전개 가능
+    백엔드 쪽 코드
+    <script type = 'text/javascript'> 오리지널 - commonjs-기존 프론트쪽 코드
+    한계 : 다른 서버(클라우드서비스)와 연계 어려움
+    module일때 import, export 사용불가
+    그래서 javascript/firebase.js작성한 뒤 끝에 export를 추가 함
+    사용자가 정의한 XXX.js를 외부에서 사용가능해짐
+    */
+    import {app} from '/javascripts/firebase.js'
+    import {getFirestore, addDoc, collection} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js'
+    console.log(app)
+    const db = getFirestore(app)
+    console.log(db)
+    const email = localStorage.getItem("email")
+    console.log(email)
+
+    $(frm).on("submit",async(event) => {
+        event.preventDefault()
+        let title = $(frm.title).val()
+        let body = $(frm.body).val()
+        //유효성 검사
+        if(title =='' || body == '') {
+            $('#modal-alert.modal-body').html("제목와 내용을 입력하세요")
+            $('#modal-alert').modal('show')
+        } else{
+            let date = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+            await addDoc(collection(db, "posts"), {
+                email : email
+                ,title : title
+                ,body : body
+                ,date : date
+            })
+            //슬쓰기 성공시 목록으로 -> routes -> index.js
+            location.href="/posts"
+        }
+    })
+</script>
+<!-- 
+1. 제목과 내용을 입력한 후 글 등록을 누르면 로그인시 localStorage에 저장된 email과 uid중
+    이메일주소를 작성자 컬럼에 추가한다.
+2. 따라서 로그인을 해야 글쓰기 가능
+-->

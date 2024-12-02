@@ -1,0 +1,127 @@
+<style>
+	.heart0,.heart1 {
+		cursor: pointer;
+		float: right;
+		color: red;
+		font-size: 1.5rem;
+	}
+
+	.fcnt {
+		font-size: 0.5rem;
+		float: right;
+		margin-top: 15px;
+	}
+</style>
+<div class="row my-2">
+	<div class="col">
+		<h1 class="text-center mb-2">게시글</h1>
+		<div class="text-end">
+			<button class="btn btn-primary btn-sm" id="btn-write">글쓰기</button>
+		</div>
+		<div id="posts"></div>
+		<div class="text-center my-3" id="btn-group" style="display:none">
+			<button class="btn btn-primary btn-sm" id="btn-prev">이전</button>
+			<span class="px-2" id="span-page">1</span>
+			<button class="btn btn-primary btn-sm" id="btn-next">다음</button>
+		</div>
+	</div>
+</div>
+<script type="text/x-handlebars-template" id="temp-posts">
+    <!-- each 옆에 depts대신에 카카오 도서 검색 결과 라벨은 documents 배열의 이름
+    만일 이름이 다르면 출력이 안됨. 주의
+    템플릿에서 JSON데이터 안의 JSON 데이터는 .으로 호출한다.
+    -->
+    {{#each this}}
+<!-- 아래 구간이 n번 반복해야 된다.원래면 for문 또는 while문 써야함. -->
+<div class="card my-2">
+	<div class="card-body">
+		<a href="#">{{ title }}</a>
+		<div class="ellipsis">{{body}}</div>
+	</div>
+	<div class="card-footer">
+		<span>Posted on {{ date }} by {{ email }}</span>
+		<span class="heart{{ucnt}}" id="{{id}}">
+			<span>{{ heart ucnt }}</span>
+			<span class="fcnt">{{ fcnt }}</span>
+		</span>
+	</div>
+</div>
+{{/each}}
+</script>
+<script>
+	//fcnt - 전체 좋아요 갯수, ucnt- 너가 좋아요 갯수
+    //채워진 하트는 내가 누른 좋아요이고 빈 하트는 전체 좋아요 수입니다.
+    Handlebars.registerHelper("heart", (ucnt) => {
+        if(ucnt == 0) return "🤍"; else return "❤";
+    })
+</script>
+<script type="module">
+	import { app } from "/javascripts/firebase.js"
+	import { getFirestore, getDocs, collection, query, orderBy, where, addDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js"
+	const db = getFirestore(app)
+	//브라우저 로컬저장소에 있는 값을 읽어오기
+	const email = localStorage.getItem("email")
+
+	getList()
+	async function getList(){
+		const q = query(collection(db, "posts"), orderBy('date',"desc"))
+		const snapshot = await getDocs(q)
+		//좋아요에 대한 정보를 추가하여 담을 배열 선언
+		let rows = []
+		console.log(snapshot.empty)
+		//firestore에서 가져온 collection이 없다면 아래 코드를 진행할 필요가 없어서
+        //return을 사용합니다.
+		if(snapshot.empty){
+			console.log("no data")
+			return //함수를 빠져 나간다. 왜냐면 바인딩할 데이터셋이 없으므로
+		}
+		//글목록 소환
+		//const posts = snapshot.docs.map(doc => doc.data())
+		snapshot.docs.forEach(async(row, index) => {
+			console.log(row)
+      console.log(index)
+			//전체 좋아요 수
+			const q1 = query(collection(db, 'favorite'), where("pid","==", row.id))
+			const snap1 = await getDocs(q1)
+			//console.log(snap1.docs.length)
+			//로그인한 사용자의 좋아요 체크
+			const q2 = query(collection(db, 'favorite'), where("pid","==", row.id), where("email","==", email))
+			const snap2 = await getDocs(q2)
+			//console.log(snap2.docs.length)
+			//posts에서 가져온 정보에 전체 좋아요
+			//배열에 값을 추가할 때는 push사용함
+			rows.push({
+				id: row.id
+				, ...row.data()
+				, fcnt: snap1.docs.length
+				, ucnt: snap2.docs.length
+			})
+			//console.log(rows)
+			let temp = Handlebars.compile($("#temp-posts").html())
+			$("#posts").html(temp(rows))
+		})
+	}/////// end of getList
+
+	//좋아요 추가
+	$("#posts").on("click", ".heart0", async function() {
+		let id = $(this).attr("id")
+		//console.log(`pid : ${id}`)
+		//email이 있다는 건 로그인상태이다. - localStorage.getItem("email")
+		if (email) {
+			await addDoc(collection(db, "favorite"), {pid:id, email:email})
+			console.log("좋아요 추가") 
+			getList()
+		}
+		//이메일 없는경우 로그인 화면으로
+		else {
+			alert("로그인이 필요합니다.");
+			location.href = "/login"
+		}
+		//좋아요 삭제
+	})
+
+	$("#btn-write").on("click", () => {
+		//email이 있으면 글쓰기로 이동해줘
+		location.href = "/posts/write"
+	})
+</script>

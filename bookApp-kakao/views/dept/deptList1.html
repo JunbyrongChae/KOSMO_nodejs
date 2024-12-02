@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Handelbar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+</head>
+<body>
+        <ul id="commentUl">
+        </ul>
+     <!-- 1. 템플레이팅할 html을 세팅한다. 이때 데이터 바인딩 시킬 부분은 -->
+ <!--{{바인딩시킬 데이터의 프로퍼티명}} 의 형태로 적는다.  -->
+    <script type="text/x-handlebars-template" id="tb-dept">
+        <table border="1">
+            <!--해더영역 시작-->
+            <thead>
+                <tr>
+                    <th>부서번호</th>
+                    <th>부서명</th>
+                    <th>지역</th>
+                </tr>
+            </thead>
+            <!--해더영역 시작-->
+            <!--데이터셋이 추가하는 화면 제공되는 영역 시작-->
+            <tbody>
+                {{#each depts}}
+                <tr>
+                    <td>{{deptno}}</td>
+                    <td>{{dname}}</td>
+                    <td>{{loc}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+            <!--데이터셋이 추가하는 화면 제공되는 영역 시작-->
+        </table>
+    </script>
+
+    <!-- 데이터를 랜더링 할 컨테이너 -->
+    <div id="output"></div>
+
+    <script type="text/javascript">
+        //데이터셋 정의-벡엔드처리영역
+        const data = {
+            depts :[
+                {deptno:10, dname:"ACCOUNTING", loc:"NEW YORK"}
+                ,{deptno:20, dname:"RESEARCH", loc:"DALLAS"}
+                ,{deptno:30, dname:"SALES", loc:"CHICAGO"}
+            ]
+        }
+        //템플릿 가져오기
+        const source = document.querySelector("#tb-dept").innerHTML
+        //템플릿 컴파일 - 매핑(데이터와 뷰사이 머지)
+        const template = Handlebars.compile(source)
+        //데이터와 htnl 랜더링
+        const html = template(data)
+        //결과 출력
+        document.querySelector("#output").innerHTML = html
+    </script>
+</body>
+</html>

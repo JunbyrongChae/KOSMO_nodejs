@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handlebars-실습</title>
+    <!-- Handlebars 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+</head>
+<body>
+    <script>
+        //부서집합 데이터셋
+        const data = {
+            depts :[
+                {deptno:10, dname:"ACCOUNTING", loc:"NEW YORK"}
+                ,{deptno:20, dname:"RESEARCH", loc:"DALLAS"}
+                ,{deptno:30, dname:"SALES", loc:"CHICAGO"}
+            ]
+        }
+    </script>
+    
+    <!-- 
+    li태그의 수를 우리가 못 정함. -데이터셋의 수를 봐야 결정 가능
+    반복코드는 묶음
+    외부라이브러리인 Handlebars를 이용-js
+    -->
+    <script id = 'dept-template' type="text/x-handlebars-template">
+        <ul>
+            {{#each depts}} 
+            <li>{{deptno}}, {{dname}}, {{loc}}</li>
+            {{/each}}
+        </ul>
+    </script>
+    <!--데이터 바인딩 컨테이너-->
+    <div id="root"></div>
+    <script>
+        //템플릿 가져오기-script태그 안에 들어있는html 태그들
+        const source = document.querySelector("#dept-template").innerHTML
+        //템플릿 컴파일(compile)
+        const template = Handlebars.compile(source)
+        const html = template(data)
+        //결과 출력
+        document.querySelector("#root").innerHTML = html
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<div class="row mt-5 justify-content-end">
+    <div class="col-6 col-md-4">
+      <form name="frm">
+        <div class="input-group">
+          <input type="text" name="query" class="form-control" value="" />
+          <button class="btn btn-danger">검색</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <hr />
+  
+  <!-- 카카오 도서검색 결과를 출력할 공간 마련해둠 -->
+  <div class="row" id="list_book"></div>
+  <!-- 카카오 도서검색 결과를 출력할 공간 마련해둠 -->
+
+  <!-- 도서목록 템플릿 -->
+  <script type="text/x-handlebars-template" id="temp-book">
+    <!-- each옆에 depts대신에 카카오도서검색 결과 라벨은 document배열의 이름, 이름다르면 출력 안됨 주의 -->
+    {{#each documents}}
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card my-2">
+        <div class="card-body">
+          <img src="{{thumbnail}}" alt="도서이미지" style="cursor: pointer;width: 100%;" />
+          <h5 class="ellipsis mt-2">{{title}}</h5>
+          <p class="ellipsis">{{authors}}...</p>
+        </div>
+        <div class="card-footer" style="font-size: 0.8rem">
+          <div class="text-center">
+            {{price}}
+            <span style="cursor: pointer;color: black;">cart</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </script>
+  <!-- 도서목록 템플릿 -->
+  
+  <div class="text-center mt-2">
+    <button class="btn btn-primary btn-sm px-5" id="prev">이전</button>
+    <span id="page" class="px-3">1/10</span>
+    <button class="btn btn-primary btn-sm px-5" id="next">다음</button>
+  </div>
+
+<script>
+    //사용자가 입력한 키워드 가져오기
+    let query = $(frm.query).val();
+    let page = 1;
+    //도서데이터 가져오기
+    const getList = () => {
+        console.log(`page=${page}, query=${query}`);
+        $.ajax({
+            method: "GET",
+            url: "https://dapi.kakao.com/v3/search/book?target=title",
+            headers: {Authorization:'KakaoAK 44927bb1261fe44bf6b58ca626be6a3b'},
+            data:{query:query, page:page, size:10},
+            dataType: "json",
+            success:function(data){
+              console.log(data);
+              let temp = Handlebars.compile($("#temp-book").html());
+              let html = temp(data);
+              $("#list_book").html(html);
+            },
+            error:function(err){
+                console.log(err);
+            }
+        });
+    }
+    getList();
+    $(frm).on('submit',(e)=>{
+        e.preventDefault();
+        query = $(frm.query).val();
+        page = 1;
+        getList();
+    })
+</script>

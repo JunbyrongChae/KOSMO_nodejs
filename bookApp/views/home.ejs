@@ -1,0 +1,22 @@
+<div class="row my-5">
+    <div class="col">
+        <%-include('book/bookList.ejs')%><!-- 도서목록 --><br>
+        <%-include('book/bestBook.ejs')%><!-- 베스트 도서목록 --><br>
+        <%-include('book/recentBook.ejs')%><!-- 최신 도서목록 --><br>
+    </div>
+</div>
+
+<!-- 
+class='row my-5'
+
+- class='row' : 부트스트랩 프레임워크에서 지원하는 그리드 시스템
+row는 그리드의 한 행을 정의하며 내부의 있는 열을 정렬함
+주로 화면을 구분하고 배치를 잡는데 사용함
+
+- my-5 : 부트스트랩의 margin클래스이다. 상/하단에 5단위의 간격을 추가함
+:기본단위는 0.5rem
+
+- class = 'col' : 
+부모요소인 row안에서 열을 구성
+자동으로 화면크기에 맞춰 크기조정
+-->

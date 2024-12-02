@@ -1,0 +1,150 @@
+<div class="row mt-5 justify-content-end">
+  <div class="col-6 col-md-4">
+<!-- 검색 키워드 전송하기  -->
+    <form name="frm">
+      <div class="input-group">
+        <input type="text" name="query" class="form-control" value="" />
+        <button class="btn btn-success">검색</button>
+      </div>
+    </form>
+<!-- 검색 키워드 전송하기  -->
+
+  </div>
+</div>
+<hr />
+
+<!-- 카카오 도서검색 결과를 출력할 공간 마련해둠 -->
+<div class="row" id="list_book"></div>
+<!-- 카카오 도서검색 결과를 출력할 공간 마련해둠 -->
+
+<!-- 도서 목록 템플릿  
+for문을 안쓰는 대신에 script태그로 묶어주고 내가 정한 타입을 적어서 내가 알아볼 수 있게 해줘
+태그만 사용해도 되게 해줄게 대신에... 
+-->
+<script type="text/x-handlebars-template" id="temp-book">
+<!-- each 옆에 depts대신에 카카오 도서 검색 결과 라벨은 documents 배열의 이름
+ 만일 이름이 다르면 출력이 안됨. 주의
+-->  
+  {{#each documents}}
+  <!-- 아래 구간이 n번 반복해야 된다.원래면 for문 또는 while문 써야함. -->
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="card my-2">
+      <div class="card-body">
+        <img src="{{image thumbnail}}" index="{{@index}}" alt="도서이미지" style="cursor: pointer;width:80%">
+        <div class="ellipsis mt-2">{{title}}</div>
+      </div>
+      <div class="card-footer" style="font-size: 0.9rem;">
+        <div class="text-center">
+          {{format price}}
+          <span style="cursor: pointer;color:green">CART</span>
+        </div>
+      </div>
+    </div>
+    <%-include("modalBook.ejs") %>
+  </div>
+  {{/each}}
+</script>
+<!-- 도서 목록 템플릿  -->
+
+<div class="text-center mt-2">
+  <button class="btn btn-primary btn-sm px-5" id="prev">이전</button>
+  <span id="page" class="px-3">1/10</span>
+  <button class="btn btn-primary btn-sm px-5" id="next">다음</button>
+</div>
+
+<script>
+//Handlebars로 도서 이미지 출력시 이미지가 없으면 더미 이미지로 변환하기
+Handlebars.registerHelper("image", function(thum){
+  if(thum) return thum
+  else return "https://placehold.co/120x174"
+})
+  //가격 포맷형식 적용하기
+  Handlebars.registerHelper("format", function(price){
+      return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '원';
+  })  
+  //사용자가 입력한 키워드 가져오기
+  //폼태그 안에 사용자가 입력한 키워드를 변수에 담기
+  let query = $(frm.query).val()
+  let page = 1
+
+  //각 도서의 이미지를 클릭한 경우
+  $("#list_book").on("click", ".card img", function(){
+    //선택한 도서 이미지의 index값을 모달 번호에 사용해야 한다
+    let index = $(this).attr("index")
+    console.log(index)
+    $(`#modal${index}`).modal("show")
+  })
+
+  //페이지네비게이션의 다음 버튼을 누르면
+  $("#next").on("click",function(){
+    page++
+    getList()
+  })
+  //페이지네비게이션의 이전 버튼을 누르면 
+  $("#prev").on("click",function(){
+    page--
+    getList()
+  })
+  //도서 데이터 가져오기
+  const getList = () => {
+    //사용자가 입력한 검색 키워드(query)와 page 
+      console.log(`page=${page}, query=${query}`)
+      //아래 함수는 jquery-1.12.0.js에서 제공하는 함수 이다.
+      //비동기 처리를 위한 함수 사용이다. - waiting이 있다. - 왜냐면 카카오 서버에서 받아오니까 - 지연
+      $.ajax({
+          method: "GET",
+          url: "https://dapi.kakao.com/v3/search/book?",
+          headers: { Authorization: "KakaoAK 44927bb1261fe44bf6b58ca626be6a3b" },
+          data : { query: query, page: page, size:6 },/* 파라미터로 넘어가는 값-노출 */
+          //mime type  application/json
+          dataType: "json", //응답으로 받는 타입은 JSON 이다. - 왜냐면 카카오서버가 나에게 scott계정 tiger비번을 알려줄수 없잖아
+              success: function(data){//성공했어 if(ajax.readyState == 4)
+                //응답으로 받은 정보를 data가 쥐고 있다. data는 json형식이다.
+                  console.log(data)
+                  //응답으로 받은 데이터를 미리 선언해둔 템플릿(화면)에 매핑해줌(머지)
+                  let temp = Handlebars.compile($("#temp-book").html())
+                  //div태그 안에 출력하기 - 시각화 
+                  $("#list_book").html(temp(data))
+                  //페이지 네비게이션 추가
+                  //마지막 페이지 여부 체크
+                  let is_end = data.meta.is_end
+                  //검색 가능한 데이터 수
+                  let total = data.meta.total_count
+                  //마지막 페이지 
+                  let last = Math.ceil(total/6)
+                  //바뀐 페이지 번호 적용하기
+                  $("#page").html(`${page}/${last}`)
+                  if(page === 1) $("#prev").attr("disabled", true)
+                  else $("#prev").attr("disabled", false)
+                  if(is_end) $("#next").attr("disabled", true)
+                  else $("#next").attr("disabled", false)
+              },
+              error:function(error){
+                console.log(error)
+              }
+          });
+  }
+  //아래 함수를 주석으로 막으면 조회결과는 없다.
+  //getList()
+  //검색창에서 입력한 책 제목을 읽어오기
+  $(frm).on("submit", (e) => {
+      console.log("전송 호출")
+      e.preventDefault() //submit이슈 - 새로고침이 발생함.- 방지코드
+      query = $(frm.query).val() //사용자가 입력한 책 제목
+      page = 1 //1페이지를 보여줘 - 페이징 처리
+      getList() //도서 정보를 카카오 검색 API활용 -json형식, array
+  })
+</script>
+
+
+<!-- 
+justify-content-end : 내부 요소를 가로 방향으로 끝정렬
+justify-content-center :  내부 요소를 가로 방향으로 중앙 정렬
+폼컨테이너
+col-6 col-md-4
+- 화면 크기에 따라 열의 너비를 다르게 설정함
+1. col-6 : 화면에서 전체의 6/12 너비 차지함
+col-8 8/12(약 67%)
+2. col-md-6 : 중간화면에서 전체의 6/12너비차지함
+3. col-lg-4: 큰화면에서 전체 4/12 너비
+-->

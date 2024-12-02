@@ -1,0 +1,55 @@
+<!-- 
+마이페이지 확인 url - http://localhost:3000/users/mypage
+회원정보 수정 url - http://localhost:3000/users/update
+-->
+<div class="row my-5">
+	<div class="col">
+		<h1 class="text-center mb-5">회원정보</h1>
+		<div id="dmypage"><!-- info here --></div>
+		<div class="text-center my-3">
+			<a href="/users/update">
+				<button class="btn btn-primary px-5">정보수정</button>
+			</a>
+		</div>
+	</div>
+</div>
+
+<!--마이페이지 템플릿-->
+<script id="temp_mypage" type="text/x-handlebars-template">
+    <div class="card">
+        <div class="row p-3">
+            <div class="col-md-4 col-lg-5 text-center">
+                <img src="{{photo}}" style="width:60%;border-radius:50%;" />
+            </div>
+            <div class="col mt-3">
+                <h5>이름: {{name}}</h5>
+                <hr />
+                <div class="my-3">주소: {{address}}</div>
+                <div class="my-3">전화: {{phone}}</div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="module">
+	//ES6부터 모듈을 지원한다
+	import {app} from '/javascripts/firebase.js'
+	import {getFirestore, doc, getDoc} from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js'
+	const db = getFirestore(app)
+	const uid = localStorage.getItem("uid")
+	let user = {
+		name: "name",
+		photo: "https://placehold.co/200x200",
+		address: "address",
+		phone: "010-1234-5678"
+	}
+	//Cloud Firestore에 있는 정보로 업데이트 해줌
+	const snapshot = await getDoc(doc(db, `users/${uid}`))
+	console.log(snapshot.data())
+	//uid가 일치하는 사용자 정보가 있으면
+	if (snapshot.data()) {
+		user = snapshot.data()
+	}
+	const temp = Handlebars.compile($("#temp_mypage").html());
+	$("#dmypage").html(temp(user))
+</script>

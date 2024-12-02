@@ -1,0 +1,51 @@
+<div class="row my-5 justify-content-center">
+    <div class="col-8 col-md-6 col-lg-4">
+      <h3 class="text-center mb-5">로그인</h3>
+      <form name="frm" method="post">
+        <div class="input-group my-2">
+          <div class="input-group-text">이 메 일</div>
+          <input class="form-control" id ="email" name="email" value="tomato@hot.com" />
+        </div>
+        <div class="input-group">
+          <div class="input-group-text">비밀번호</div>
+          <input
+            class="form-control"
+            name="password"
+            type="password"
+            value="12345678"
+          />
+        </div>
+        <div class="my-3">
+          <button class="btn btn-success w-100">로그인</button>
+        </div>
+        <div class="text-end mt-3"><a href="/users/join">회원가입</a></div>
+      </form>
+    </div>
+  </div>
+  
+  <script type="module">
+    import {app} from '/javascripts/firebase.js'
+    import { getAuth, signInWithEmailAndPassword} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    const auth = getAuth(app);
+    //console.log(auth)
+    $(frm).on("submit", (e) => {
+      e.preventDefault()
+      let email = $(frm.email).val()
+      let password = $(frm.password).val()
+      console.log(`${email},${password}`)
+    signInWithEmailAndPassword(auth, email, password)
+      .then((data) => {
+        console.log(data)
+        console.log(`uid===> ${data.user.uid}`)
+        console.log(`email===> ${data.user.email}`)
+        localStorage.setItem("email", data.user.email)
+        localStorage.setItem("uid", data.user.uid)
+        //로그인이 성공하면 메인페이지로 이동하기
+        location.href="/"
+      })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+  });
+    })
+</script>
