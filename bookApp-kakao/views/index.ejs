@@ -36,3 +36,24 @@
     </div>
   </body>
 </html>
+<!--
+  서버가 기동할 때 bin아래 www파일을 읽는다. - 포트번호 결정
+  www파일에서 app.js를 참조한다.
+  app.js에는 아래와 같은 라우터 설정이 되어 있다.
+  var indexRouter = require('./routes/index');//일반적인 메뉴
+  var usersRouter = require('./routes/users');//myPage, 장바구니
+
+  // view engine setup
+  //아래에서 __dirname은 프로젝트명 아래를 의미함
+  app.set('views', path.join(__dirname, 'views'));
+  //뷰엔진은 ejs를 사용한다. - 뷰 템플릿의 종류이다.(pug, ejs, handlebars,....)
+  app.set('view engine', 'ejs');
+
+  //정적페이지(리소스들,  이미지, css, js...)
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  요청 URL에 대한 가이드 이다.
+  물리적인 배포 위치에 정보이다. - 404
+  app.use('/', indexRouter); /login, /book
+  app.use('/users', usersRouter); /users/join, /users/cart, ....
+-->

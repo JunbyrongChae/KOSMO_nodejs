@@ -9,8 +9,9 @@
 <nav class="navbar navbar-expand-lg bg-success navbar-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/">한빛미디어</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+      aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -39,7 +40,7 @@
             <a href="/login" aria-current="page" class="nav-link active">로그인</a>
           </li>
           <li class="nav-item" id="email" style="display: none;">
-            <a href="#" aria-current="page" class="nav-link active">현사용자</a>
+            <a href="#" aria-current="page" class="nav-link active">현사용자이메일정보출력자리</a>
           </li>
           <li class="nav-item" id="logout" style="display: none;">
             <a href="#" aria-current="page" class="nav-link active">로그아웃</a>
@@ -77,11 +78,8 @@
       localStorage.removeItem("uid");
       $("#login,#logout").toggle();
       $("#mypage").hide(); */
-    })
-      .catch((error) => {
+    }).catch((error) => {
         console.log(error);
-        const errorCode = error.code;
-        const errorMessage = error.message;
       })
     localStorage.clear();
     location.href = "/"
@@ -89,13 +87,16 @@
 
 </script>
 <script>
-  //console.log(`로그인성공시 uid ===> ${localStorage.getItem("uid")},${localStorage.getItem("email")}`);
-  if (localStorage.getItem("email")) {
-    //console.log('이메일이 존재하면');
-    $("#login, #logout, #mypage, #email, #cart").toggle()
-    $("#email a").html(localStorage.getItem("email")) // innerHTML과 같다
-    //$("#mypage a").text(`MyPage(${localStorage.getItem("email")})`); text는 innerText와 같다 - 태그 그대로 출력
-  }
+  console.log(`로그인성공시 uid ===> ${localStorage.getItem("uid")},${localStorage.getItem("email")}`);
+  if(localStorage.getItem("email")){
+      console.log("email이 존재하면....")
+      //메뉴바에 메뉴가 로그인일때와 로그인 이전일 때 달라야 함.
+      //jquery에서 제공하는 toggle()을 사용하면 보이는 건 안보이게 안보이는건 보이게 처리해줌
+      $("#login, #logout, #mypage, #email, #cart").toggle()
+      $("#email a").html(localStorage.getItem("email")) //innerHTML과 같다.태그는 안보임
+      //$("#mypage a").text(localStorage.getItem("email")) text는 innerText와 같다.
+      //태그가 그대로 출력이 된다.
+    }
   applySlider();
   function applySlider() {
     $('#slider-div').slick({
@@ -118,8 +119,7 @@
         {
           breakpoint: 960,  //화면 사이즈 960px
           settings: { slidesToShow: 3 }  //위에 옵션이 디폴트 , 여기에 추가하면 그걸로 변경
-        },
-        {
+        }, {
           breakpoint: 768,  //화면 사이즈 768px
           settings: { slidesToShow: 2 }  //위에 옵션이 디폴트 , 여기에 추가하면 그걸로 변경
         }

@@ -35,6 +35,20 @@
     e.preventDefault();//submit 이슈로 추가 - 없으면 새로고침 발생
     $("#modal-confirm .modal-body").html("게시글을 수정하시겠습니까?");
     $("#modal-confirm").modal("show");
-    //location.href="/posts";
-    });
+    $("#modal-confirm").on("click", ".btn-primary", async function() {
+      //사용자가 입력한 제목/내용 가져오기
+      const title = $(frm.title).val();
+      const body = $(frm.body).val();
+      await setDoc(doc(db, `posts/${id}`), {
+        ...post,
+        title:title,
+        body:body
+      });
+      location.href="/posts";
+    })
+    $(frm).on("reset", function(e) {
+      e.preventDefault();
+      getPost();
+    })
+  });
 </script>

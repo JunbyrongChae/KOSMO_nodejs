@@ -1,0 +1,44 @@
+<div class="row my-5">
+  <div class="col">
+      <h1 class="text-center mb-5">장바구니</h1>
+      <!-- Realtime DB -->
+      <div id="cart_list"></div>
+  </div>
+</div>
+<!--장바구니 템플릿-->
+<script id="temp" type="text/x-handlebars-template">
+  <table class="table table-striped">
+  {{#each this}}
+      <tr>
+          <td>{{title}}</td>
+          <td>{{authors}}</td>
+          <td>{{price}}</td>
+          <td><button class="btn btn-danger btn-sm" isbn="{{ isbn }}">삭제</button></td>
+      </tr>
+  {{/each}}
+  </table>
+</script>
+
+<script type="module">
+  import { app } from "/javascripts/firebase.js"
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  const db = getDatabase(app)
+  const uid = localStorage.getItem("uid")
+  //장바구니 데이터 가져오기
+  onValue(ref(db, `cart/${uid}`), snapshot => {
+    let rows = []
+    snapshot.forEach(row => {
+      rows.push({key: row.key, ...row.val()
+      })
+    })
+    let temp = Handlebars.compile($("#temp").html())
+    $("#cart_list").html(template(rows))
+  })
+  //장바구니 데이터 삭제
+  $("#cart_list").on("click", "btn-danger", function () {
+    let isbn = $(this).attr("isbn")
+    if(confirm(isbn+"삭제 하시겠습니까?")){
+      remove(ref(db, `cart/${uid}/${isbn}`))
+    }
+  })
+</script>

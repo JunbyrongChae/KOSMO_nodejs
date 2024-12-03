@@ -1,18 +1,15 @@
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="python-tab" data-bs-toggle="tab" 
-          data-bs-target="#tab-pane" type="button"
-          role="tab" aria-controls="python-tab-pane" aria-selected="true">파이썬</button>
+    <button class="nav-link active" id="python-tab" data-bs-toggle="tab" data-bs-target="#tab-pane" type="button"
+      role="tab" aria-controls="python-tab-pane" aria-selected="true">파이썬</button>
   </li>
   <li class="nav-item" role="presentation">
-      <button class="nav-link" id="react-tab" data-bs-toggle="tab" 
-          data-bs-target="#tab-pane" type="button"
-          role="tab" aria-controls="react-tab-pane" aria-selected="false">리액트</button>
+    <button class="nav-link" id="react-tab" data-bs-toggle="tab" data-bs-target="#tab-pane" type="button" role="tab"
+      aria-controls="react-tab-pane" aria-selected="false">리액트</button>
   </li>
   <li class="nav-item" role="presentation">
-      <button class="nav-link" id="sql-tab" data-bs-toggle="tab" 
-          data-bs-target="#tab-pane" type="button"
-          role="tab" aria-controls="sql-tab-pane" aria-selected="false">SQL</button>
+    <button class="nav-link" id="sql-tab" data-bs-toggle="tab" data-bs-target="#tab-pane" type="button" role="tab"
+      aria-controls="sql-tab-pane" aria-selected="false">SQL</button>
   </li>
 </ul>
 <!-- 
@@ -32,7 +29,7 @@ $("#best_book").html();
 -->
 <div class="tab-content" id="myTabContent">
   <div class="tab-pane fade show active" id="tab-pane" role="tabpanel" aria-labelledby="python-tab" tabindex="0">
-      <div id="best_book" class="row my-5"></div>
+    <div id="best_book" class="row my-5"></div>
   </div>
 </div>
 <script type="text/x-handlebars-template" id="temp-best">
@@ -52,40 +49,39 @@ $("#best_book").html();
   let best = "python"
   getBest()
   $("#python-tab").on("click", () => {
-      best = "python"
-      getBest()
+    best = "python"
+    getBest()
   })
   $("#react-tab").on("click", () => {
-      best = "리액트"
-      getBest()
+    best = "리액트"
+    getBest()
   })
   $("#sql-tab").on("click", () => {
-      best = "SQL"
-      getBest()
+    best = "SQL"
+    getBest()
   })
-  function getBest(){
-      $.ajax({
-          method: "GET",
-          url: "https://dapi.kakao.com/v3/search/book?target=title",
-          headers: { Authorization: "KakaoAK 44927bb1261fe44bf6b58ca626be6a3b" },
-          data : { query: best, page: page, size:6, sort: 'latest' },/* 파라미터로 넘어가는 값-노출 */
-          //mime type  application/json
-          dataType: "json", //응답으로 받는 타입은 JSON 이다. - 왜냐면 카카오서버가 나에게 scott계정 tiger비번을 알려줄수 없잖아
-              success: function(data){//성공했어 if(ajax.readyState == 4)
-                //응답으로 받은 정보를 data가 쥐고 있다. data는 json형식이다.
-                  console.log(data)
-                  //응답으로 받은 데이터를 미리 선언해둔 템플릿(화면)에 매핑해줌(머지)
-                  let temp = Handlebars.compile($("#temp-best").html())
-                  //div태그 안에 출력하기 - 시각화 
-                  $("#best_book").html(temp(data))
-              },
-              error:function(error){
-                console.log(error)
-              }
-          }); //end of ajax      
+  function getBest() {
+    $.ajax({
+      method: "GET",
+      url: "https://dapi.kakao.com/v3/search/book?target=title",
+      headers: { Authorization: "KakaoAK 44927bb1261fe44bf6b58ca626be6a3b" },
+      data: { query: best, page: page, size: 6, sort: 'latest' },/* 파라미터로 넘어가는 값-노출 */
+      //mime type  application/json
+      dataType: "json", //응답으로 받는 타입은 JSON 이다. - 왜냐면 카카오서버가 나에게 scott계정 tiger비번을 알려줄수 없잖아
+      success: function (data) {//성공했어 if(ajax.readyState == 4)
+        //응답으로 받은 정보를 data가 쥐고 있다. data는 json형식이다.
+        //응답으로 받은 데이터를 미리 선언해둔 템플릿(화면)에 매핑해줌(머지)
+        let temp = Handlebars.compile($("#temp-best").html())
+        //div태그 안에 출력하기 - 시각화 
+        $("#best_book").html(temp(data))
+      },
+      error: function (error) {
+        console.log(error)
+      }
+    }); //end of ajax      
   }/////////end of getBest()
-  $("#best_book").on("click",".card img", function() {
-      let index = $(this).attr("index") //사용자 클릭한 이미지의 도서 인덱스 값이 담김
-      $(`#best_book #modal${index}`).modal("show")
+  $("#best_book").on("click", ".card img", function () {
+    let index = $(this).attr("index") //사용자 클릭한 이미지의 도서 인덱스 값이 담김
+    $(`#best_book #modal${index}`).modal("show")
   })
 </script>

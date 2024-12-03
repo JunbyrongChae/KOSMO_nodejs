@@ -10,6 +10,10 @@ router.get('/', function(req, res, next) {
 router.get('/join', function(req, res, next) {
   res.render('index', { title: '회원가입', pageName: 'users/join.ejs' });
 });
+/* cart */
+router.get('/cart', function(req, res, next) {
+  res.render('index', { title: '장바구니', pageName: 'users/cart.ejs' });
+});
 /* mypage */
 router.get('/mypage', function(req, res, next) {
   res.render('index', { title: '회원정보', pageName: 'users/mypage.ejs' });
